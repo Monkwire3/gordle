@@ -2,20 +2,23 @@ package main
 
 import (
 	// "fmt"
-	// "github.com/hajimehoshi/ebiten/v2"
+	"fmt"
+	"io/ioutil"
+	"strings"
+	"time"
+
 	// "github.com/hajimehoshi/ebiten/v2/inpututil"
-	// "github.com/hajimehoshi/ebiten/v2/text"
+
 	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/examples/resources/fonts"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
-	// "io/ioutil"
-	// "log"
-	// "math/rand"
-	// "strings"
-	// "time"
+
+	"math/rand"
 )
 
 const (
@@ -27,7 +30,7 @@ const (
 )
 
 var (
-	fontSize        int = 32
+	fontSize        float64 = 24
 	mplusNormalFont font.Face
 
 	bkg       = color.White
@@ -53,11 +56,70 @@ type Game struct {
 	runes []rune
 }
 
+func repeatingKeyPressed(key ebiten.Key) bool {
+	const (
+		delay    = 30
+		interval = 3
+	)
+	d := inpututil.KeyPressDuration(key)
+
+	if d == 1 {
+		return true
+	}
+
+	if d >= delay && (d-delay)&interval == 0 {
+		return true
+	}
+
+	return false
+
+}
+
+func (g *Game) Update() error {
+
+}
+
+func (g *Game) Draw(screen *ebiten.Image) {
+
+}
+
+func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+	return width, height
+}
+
 func main() {
 	g := &Game{}
 
 	tt, err := opentype.Parse(fonts.MPlus1pRegular_ttf)
 	if err != nil {
+		log.Fatal(err)
+	}
+
+	mplusNormalFont, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    fontSize,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create the window
+	ebiten.SetWindowSize(width, height)
+	ebiten.SetWindowTitle(title)
+	content, err := ioutil.ReadFile(("dict.txt"))
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		dict = strings.Split(string(content), "\n")
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	answer = dict[rand.Intn(len(dict))]
+	fmt.Printf(answer)
+
+	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}
 
